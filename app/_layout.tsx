@@ -1,26 +1,21 @@
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
-import { useColorScheme } from '@/components/useColorScheme';
-import { Slot, usePathname } from 'expo-router';
+import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Fab, FabIcon } from '@/components/ui/fab';
-import { MoonIcon, SunIcon } from '@/components/ui/icon';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Slot } from 'expo-router';
+import { ThemeProvider, useTheme } from '../assets/theme/theme-context';
+import IndexScreen from './index';        // tu pantalla principal
+import ProfileScreen from './profile';   // nueva pantalla Profile
+import DisplayScreen from './display'
 
 SplashScreen.preventAutoHideAsync();
+export { ErrorBoundary } from 'expo-router';
+
+const Drawer = createDrawerNavigator();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -28,40 +23,53 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  const [styleLoaded, setStyleLoaded] = useState(false);
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
+    if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
-  return <RootLayoutNav />;
+
+  if (!loaded) return null;
+
+  return (
+    <ThemeProvider>
+      <RootLayoutNav />
+    </ThemeProvider>
+  );
 }
 
 function RootLayoutNav() {
-  const pathname = usePathname();
-  const [colorMode, setColorMode] = useState<'light' | 'dark'>('light');
+  const { toolbarColor } = useTheme();
 
   return (
-    <GluestackUIProvider mode={colorMode}>
-      <ThemeProvider value={colorMode === 'dark' ? DarkTheme : DefaultTheme}>
-        <Slot />
-        {pathname === '/' && (
-          <Fab
-            onPress={() =>
-              setColorMode(colorMode === 'dark' ? 'light' : 'dark')
-            }
-            className="m-6"
-            size="lg"
-          >
-            <FabIcon as={colorMode === 'dark' ? MoonIcon : SunIcon} />
-          </Fab>
-        )}
-      </ThemeProvider>
+    <GluestackUIProvider>
+      <StatusBar style="dark" />
+      <Drawer.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: { backgroundColor: toolbarColor },
+          headerTintColor: '#FFF',
+          drawerActiveTintColor: toolbarColor,
+          drawerLabelStyle: { fontSize: 16 },
+        }}
+      >
+        {/* Pantalla principal */}
+        <Drawer.Screen name="Home" options={{ title: 'David Alejandro Gutíerrez Sánchez' }}>
+          {() => <IndexScreen />}
+        </Drawer.Screen>
+
+        {/* Pantalla Profile */}
+        <Drawer.Screen name="Profile" options={{ title: 'Perfil' }}>
+          {() => <ProfileScreen />}
+        </Drawer.Screen>
+
+        <Drawer.Screen name="display" options={{ title: 'Display' }}>
+          {() => <DisplayScreen />}
+        </Drawer.Screen>
+
+      </Drawer.Navigator>
     </GluestackUIProvider>
   );
 }
