@@ -11,6 +11,8 @@ import { ThemeProvider, useTheme } from '../assets/theme/theme-context';
 import IndexScreen from './index';        // tu pantalla principal
 import ProfileScreen from './profile';   // nueva pantalla Profile
 import DisplayScreen from './display'
+import CRUDscreen from './CRUD'
+
 
 SplashScreen.preventAutoHideAsync();
 export { ErrorBoundary } from 'expo-router';
@@ -67,6 +69,10 @@ function RootLayoutNav() {
 
         <Drawer.Screen name="display" options={{ title: 'Display' }}>
           {() => <DisplayScreen />}
+        </Drawer.Screen>
+
+        <Drawer.Screen name="CRUD" options={{ title: 'CRUD' }}>
+          {() => <CRUDscreen />}
         </Drawer.Screen>
 
       </Drawer.Navigator>
